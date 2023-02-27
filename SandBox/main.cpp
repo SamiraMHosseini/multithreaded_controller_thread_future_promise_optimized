@@ -24,12 +24,13 @@ struct ThreadCount
 		}
 
 	}
+
 	/*
 	The static variable "counter" in the TC class is a shared resource among the four threads,
 	which can potentially result in a race condition. Therefore,
 	it is necessary to implement protection mechanisms to ensure its proper synchronization.
-
 	*/
+
 	static size_t counter;
 	static std::mutex mtx;
 	static std::condition_variable  cv_thread_count;
@@ -45,10 +46,10 @@ struct SharedResource
 	SharedResource() :
 		fut(), promise()
 	{
-		this->fut = this->promise.get_future().share();
+		this->fut = this->promise.get_future();
 	}
 	//These are resources that are shared between threads
-	std::shared_future<void> fut;
+	std::future<void> fut;
 	std::promise<void> promise;
 
 };
@@ -76,9 +77,13 @@ public:
 		while (true)
 		{
 
+			/*
+			Multiple threads can call std::future::wait() on the same std::future object without any issues.
+			*/
 			std::future_status status = sharedResource.fut.wait_for(1ms);
 			if (status == std::future_status::ready)
 			{
+				
 				break;
 			}
 
@@ -112,9 +117,12 @@ public:
 		ThreadCount tcB;
 		while (true)
 		{
-
+			/*
+			Multiple threads can call std::future::wait() on the same std::future object without any issues.
+			*/
 			if (sharedResource.fut.wait_for(1ms) == std::future_status::ready)
 			{
+				sharedResource.fut.get();
 				break;
 			}
 
@@ -153,7 +161,9 @@ public:
 		int index{ 0 };
 		while (true)
 		{
-
+			/*
+			Multiple threads can call std::future::wait() on the same std::future object without any issues.
+			*/
 			std::future_status status = sharedResource.fut.wait_for(1ms);
 			if (status == std::future_status::ready)
 			{
@@ -167,7 +177,7 @@ public:
 			}
 
 		}
-		//std::this_thread::sleep_for(4s);
+		std::this_thread::sleep_for(3s); //Just for experiment purposes
 
 	}
 
@@ -285,7 +295,7 @@ int main()
 	taskController.get();
 
 
-	
+
 
 }
 
