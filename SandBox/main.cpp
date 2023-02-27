@@ -39,18 +39,6 @@ struct ThreadCount
 size_t ThreadCount::counter = 0;
 std::mutex ThreadCount::mtx;
 std::condition_variable  ThreadCount::cv_thread_count;
-struct ControllerResource
-{
-	ControllerResource() :
-		mtx(), cv(), controllerFlag(false)
-	{
-
-	}
-
-	std::mutex mtx;
-	std::condition_variable cv;
-	bool controllerFlag;
-};
 
 struct SharedResource
 {
